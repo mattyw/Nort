@@ -6,7 +6,7 @@
   (:require [noir.server :as server]
             [noir.response :as response]
             [redis.core :as redis])
-  (:import (java.net.URI)))
+  (:import (java.net URI)))
 
 
 (def redis-url (new URI(System/getenv "REDISTOGO_URL" "redis://localhost:6789")))
