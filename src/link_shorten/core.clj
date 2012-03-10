@@ -4,9 +4,8 @@
         [hiccup.page-helpers]
         [hiccup.form-helpers])
   (:require [noir.server :as server]
-            [noir.response :as response]))
-
-(def links (ref {}))
+            [noir.response :as response]
+            [redis.core :as redis]))
 
 (defn uuid []
     (str (java.util.UUID/randomUUID)))
@@ -16,7 +15,8 @@
 
 (defn new-url [url]
     (let [id (str-hash url)]
-    (dosync (alter links assoc id url))
+    (redis/with-server {:host "127.0.0.1" :port 6379 :db 0}
+        (redis/hset "links" (str-hash url) url))
     id))
 
 (defn validate [url]
@@ -31,7 +31,7 @@
     (let [short (nth item 0)
           url (nth item 1)]
     [:tr
-        [:td [:a {:href (format "/%s" short)} short]]
+        [:td [:a {:href (format "/$%s" short)} short]]
         [:td [:a {:href url} url]]]))
 
 (defpartial shortened-link-lists [items]
@@ -49,7 +49,7 @@
             (include-css "style.css")]
         [:div#Container
             [:div#Box1
-            [:h1 "NORT"]
+            [:h1  "NORT"]
             [:p "a url shortener in Clojure using Noir"]]
             [:div#Box2
             [:h2 "Shorten me a link"]
@@ -57,18 +57,21 @@
                 (text-field "url")
                 (submit-button "Shorten!"))]
             [:div#Box3
-            (shortened-link-lists @links)]]))
+            (shortened-link-lists 
+                (redis/with-server {:host "127.0.0.1" :port 6379 :db 0}
+                    (redis/hgetall "links")))]]))
 
 (defpage [:post "/new"] {:keys [url]}
     (let [validated-url (validate url)]
     (if-let [short-link (new-url validated-url)]
         (response/redirect "/"))))
 
-(defpage "/:id" {:keys [id]}
+(defpage "/$:id" {:keys [id]}
     (html
         (html5 
             [:head
-            (redirect (@links id))
+            (redis/with-server {:host "127.0.0.1" :port 6379 :db 0}
+                (redirect (redis/hget "links" id)))
             [:body]])))
 
 (defn -main [& m]
