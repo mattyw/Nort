@@ -9,14 +9,16 @@
   (:import (java.net URI)))
 
 
-(def s (str (get (System/getenv) "REDISTOGO_URL" "redis://localhost:6379")))
+(def s (str (get (System/getenv) "REDISTOGO_URL" "redis://username:password@localhost:6379")))
 
 (def redis-url (new URI s))
+
+(def password (nth (.split #":" (. redis-url getUserInfo)) 1))
 
 (defmacro with-redis [body]
     `(redis/with-server {:host (. redis-url getHost)
                          :port (. redis-url getPort)
-                         :password (nth (. (. redis-url getUserInfo) split ":" 2) 1)}
+                         :password password}
     ~body))
 
 (defn uuid []
