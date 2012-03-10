@@ -8,8 +8,12 @@
             [redis.core :as redis]))
 
 
+(import '(java.net.URI))
+(def redis-url (new URI(System/getenv "REDISTOGO_URL" "redis://localhost:6789")))
+
+
 (defmacro with-redis [body]
-    `(redis/with-server {:host "127.0.0.1" :pot 6379 :db 0}
+    `(redis/with-server {:host (. getHost redis-url) :port (. getPort redis-url)}
     ~body))
 
 (defn uuid []
