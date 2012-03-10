@@ -4,8 +4,8 @@ This is an example of a web app using Clojure and Noir. It shortens urls into ha
 
 ## Usage
 
-lein deps
-lein run
+    lein deps
+    lein run
 
 ## License
 
