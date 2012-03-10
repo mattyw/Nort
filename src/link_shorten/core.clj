@@ -9,7 +9,7 @@
   (:import (java.net URI)))
 
 
-(def redis-url (new URI(System/getenv "REDISTOGO_URL" "redis://localhost:6789")))
+(def redis-url (new URI((System/getenv) "REDISTOGO_URL" "redis://localhost:6789")))
 
 
 (defmacro with-redis [body]
