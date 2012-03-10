@@ -14,7 +14,9 @@
 (def redis-url (new URI s))
 
 (defmacro with-redis [body]
-    `(redis/with-server {:host (. redis-url getHost) :port (. redis-url getPort)}
+    `(redis/with-server {:host (. redis-url getHost)
+                         :port (. redis-url getPort)
+                         :password (nth (. (. redis-url getUserInfo) split ":" 2) 1)}
     ~body))
 
 (defn uuid []
