@@ -7,6 +7,11 @@
             [noir.response :as response]
             [redis.core :as redis]))
 
+
+(defmacro with-redis [body]
+    `(redis/with-server {:host "127.0.0.1" :pot 6379 :db 0}
+    ~body))
+
 (defn uuid []
     (str (java.util.UUID/randomUUID)))
 
@@ -15,7 +20,7 @@
 
 (defn new-url [url]
     (let [id (str-hash url)]
-    (redis/with-server {:host "127.0.0.1" :port 6379 :db 0}
+    (with-redis
         (redis/hset "links" (str-hash url) url))
     id))
 
@@ -58,7 +63,7 @@
                 (submit-button "Shorten!"))]
             [:div#Box3
             (shortened-link-lists 
-                (redis/with-server {:host "127.0.0.1" :port 6379 :db 0}
+                (with-redis
                     (redis/hgetall "links")))]]))
 
 (defpage [:post "/new"] {:keys [url]}
@@ -70,7 +75,7 @@
     (html
         (html5 
             [:head
-            (redis/with-server {:host "127.0.0.1" :port 6379 :db 0}
+            (with-redis
                 (redirect (redis/hget "links" id)))
             [:body]])))
 
