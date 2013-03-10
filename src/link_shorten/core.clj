@@ -14,6 +14,7 @@
 (def redis-url (new URI s))
 
 (def password (nth (.split #":" (. redis-url getUserInfo)) 1))
+;(def password "foobared") #Useful for local setup
 
 (defmacro with-redis [body]
     `(redis/with-server {:host (. redis-url getHost)
@@ -32,6 +33,11 @@
     (with-redis
         (redis/hset "links" (str-hash url) url))
     id))
+
+(defn new-named-url [url name]
+    (with-redis
+        (redis/hset "links" name url))
+    name)
 
 (defn validate [url]
     (if (.startsWith url "http://")
@@ -70,6 +76,13 @@
             (form-to [:post "/new"]
                 (text-field "url")
                 (submit-button "Shorten!"))]
+            [:div#Box2
+            [:h2 "Let me choose the shorter name"]
+            (form-to [:post "/newnamed"]
+                (text-field "url")
+                [:p "Choose a shorter name"]
+                (text-field "name")
+                (submit-button "Shorten!"))]
             [:div#Box3
             (shortened-link-lists 
                 (with-redis
@@ -78,6 +91,11 @@
 (defpage [:post "/new"] {:keys [url]}
     (let [validated-url (validate url)]
     (if-let [short-link (new-url validated-url)]
+        (response/redirect "/"))))
+
+(defpage [:post "/newnamed"] {:keys [url name]}
+    (let [validated-url (validate url)]
+    (if-let [short-link (new-named-url validated-url name)]
         (response/redirect "/"))))
 
 (defpage "/$:id" {:keys [id]}

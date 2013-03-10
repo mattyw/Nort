@@ -16,10 +16,10 @@
     min-height: 150px; /**non-IE browsers**/
     _height: 150px; /**IE6 only**/
     margin-bottom:45px;
-    border: 8px solid #3366CC;
+    border: 8px solid #DFDFDE;
     border-radius: 15px;
     /*background:#90CAF2*/;
-    background:#3366CC;
+    background:#DFDFDE;
 /**to reduce float drop issues in IE6**/
     overflow: hidden;
     word-wrap: break-word;}
